@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerador de QR Code Personalizado</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 2rem; }
+    input, button { margin: 0.5rem; padding: 0.5rem; }
+    canvas { margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🎨 Gerador de QR Code Personalizado</h1>
+
+  <input type="text" id="link" placeholder="Digite o link aqui" size="40">
+  <br>
+  <label>Cor de fundo: <input type="color" id="bgColor" value="#ffffff"></label>
+  <label>Cor dos quadrados: <input type="color" id="fgColor" value="#000000"></label>
+  <br>
+  <label>Logo (opcional): <input type="file" id="logoUpload" accept="image/*"></label>
+  <br>
+  <button onclick="gerarQRCode()">Gerar QR Code</button>
+  <div id="qrcode"></div>
+  <br>
+  <a id="downloadLink" style="display:none" download="qrcode.png">📥 Baixar QR Code</a>
+
+  <script>
+    function gerarQRCode() {
+      const link = document.getElementById("link").value;
+      const bgColor = document.getElementById("bgColor").value;
+      const fgColor = document.getElementById("fgColor").value;
+      const logoInput = document.getElementById("logoUpload");
+
+      document.getElementById("qrcode").innerHTML = "";
+
+      const qr = new QRCode("qrcode", {
+        text: link,
+        width: 256,
+        height: 256,
+        colorDark: fgColor,
+        colorLight: bgColor,
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      setTimeout(() => {
+        const canvas = document.querySelector("#qrcode canvas");
+        if (!canvas) return;
+
+        if (logoInput.files[0]) {
+          const ctx = canvas.getContext("2d");
+          const img = new Image();
+          img.onload = function () {
+            const size = 60;
+            const x = (canvas.width - size) / 2;
+            const y = (canvas.height - size) / 2;
+            ctx.drawImage(img, x, y, size, size);
+            prepararDownload(canvas);
+          };
+          img.src = URL.createObjectURL(logoInput.files[0]);
+        } else {
+          prepararDownload(canvas);
+        }
+      }, 500);
+    }
+
+    function prepararDownload(canvas) {
+      const link = document.getElementById("downloadLink");
+      link.href = canvas.toDataURL();
+      link.style.display = "inline";
+    }
+  </script>
+</body>
+</html>
